@@ -12,7 +12,18 @@ NOM = "Jns Académie"
 PAYS = "RÉPUBLIQUE DÉMOCRATIQUE DU CONGO"
 UNIVERSITE = "UNIVERSITÉ DE KOLWEZI"
 FACULTE = "Faculté des Sciences : GEOLOGIE"   # faculté par défaut (si non précisée pour l'étudiant)
-MOT_DE_PASSE = "Malgre tout jns12"  # À CHANGER avant utilisation réelle
+MOT_DE_PASSE_PAR_DEFAUT = "admin123"   # utilisé seulement si aucun secret n'est défini
+
+
+def lire_mot_de_passe():
+    """Mot de passe admin : secret Streamlit MOT_DE_PASSE, sinon variable d'environnement, sinon défaut."""
+    try:
+        valeur = st.secrets["MOT_DE_PASSE"]
+        if valeur:
+            return str(valeur)
+    except Exception:
+        pass
+    return os.environ.get("JNS_MOT_DE_PASSE", MOT_DE_PASSE_PAR_DEFAUT)
 
 FICHIERS = {
     "etudiants": ["matricule", "nom", "promotion", "code", "frais_dus", "frais_payes", "faculte"],
@@ -596,7 +607,9 @@ def import_csv(nom, defauts=None):
 
 def espace_admin():
     st.subheader("Espace administrateur")
-    if st.text_input("Mot de passe", type="password") != MOT_DE_PASSE:
+    if lire_mot_de_passe() == MOT_DE_PASSE_PAR_DEFAUT:
+        st.warning("Le mot de passe par défaut est encore utilisé. Définissez le secret MOT_DE_PASSE.")
+    if st.text_input("Mot de passe", type="password") != lire_mot_de_passe():
         st.info("Entrez le mot de passe pour continuer.")
         return
 
